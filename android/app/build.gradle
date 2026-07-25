@@ -1,0 +1,52 @@
+plugins {
+    id "com.android.application"
+}
+
+def localConfig = new Properties()
+def localConfigFile = rootProject.file("local.properties")
+if (localConfigFile.exists()) {
+    localConfigFile.withInputStream { localConfig.load(it) }
+}
+def mobileConfigFile = rootProject.file("../agent-deck-mobile.json")
+def mobileConfig = mobileConfigFile.exists()
+        ? new groovy.json.JsonSlurper().parse(mobileConfigFile)
+        : [:]
+
+def quoted = { value ->
+    "\"" + String.valueOf(value ?: "").replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+}
+
+android {
+    namespace "com.hyperioncode.agentdeck"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.hyperioncode.agentdeck"
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+        buildConfigField "String", "AGENT_DECK_URL",
+                quoted(localConfig.getProperty(
+                        "agentDeck.url", System.getenv("AGENT_DECK_URL")
+                ))
+        buildConfigField "String", "AGENT_DECK_LAN_URL",
+                quoted(localConfig.getProperty(
+                        "agentDeck.lanUrl", System.getenv("AGENT_DECK_LAN_URL")
+                ))
+        buildConfigField "String", "AGENT_DECK_TOKEN",
+                quoted(localConfig.getProperty(
+                        "agentDeck.token",
+                        System.getenv("AGENT_DECK_TOKEN") ?: mobileConfig.token
+                ))
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

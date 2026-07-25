@@ -1,0 +1,10 @@
+__pycache__/
+cache/
+agent_deck.log*
+current-thread.txt
+last-ide.txt
+agent-deck-mobile.json
+calendar-feed-url.txt
+agent-deck-private.json
+dist/
+
